@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css?family=Josefin+Sans');
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+body {
+    background: #202026;
+}
+
+table,
+thead {
+    background: #1b1c21;
+}
+
+table thead * {
+    font-weight: bold;
+    color: #9c9c9c !important;
+}
+
+* {
+    font-family: 'Roboto', sans-serif !important;
+}
+
+td{
+    border-style: hidden !important;
+}
+th {
+    border-color: #ffffff0a !important;
+}
+
+.dot {
+    height: 2px;
+    width: 2px;
+    background-color: #646464;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+th.Sat,
+th.Sun,
+td.Sat,
+td.Sun {
+    background: #18181c !important;
+}
+.today {
+    border-bottom: 2px solid #f1304a !important;
+}
+.fix {
+    border-bottom: 2px solid #f1304a !important;
+}
+.do {
+    border-bottom: 2px solid #30f16a !important;
+}
+.doTitle {
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    display: inline-block;
+}
+tbody td.stuck {
+    background-color: #18181c;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+}
+
+tbody tr:first-child td.stuck:first-child {
+    left: 0;
+}
+
+tbody tr:not(:first-child) td.stuck:first-child {
+    left: 150px;
+}
