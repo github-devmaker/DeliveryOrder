@@ -21,6 +21,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import dayjs from 'dayjs'
 function App() {
   const [openDialogLogout, setOpenDialogLogout] = useState(false);
   const [plan, setPlan] = useState([]);
@@ -103,7 +104,7 @@ function App() {
       column.push({
         label: sDate.format('YYYY-MM-DD'),
         date: sDate.format('YYYY-MM-DD'),
-        width: 75,
+        width: 85,
         height: 40,
         type: 'day',
         numeric: false
@@ -113,7 +114,7 @@ function App() {
     column.push({
       label: sDate.format('YYYY-MM-DD'),
       date: sDate.format('YYYY-MM-DD'),
-      width: 75,
+      width: 85,
       height: 40,
       type: 'day',
       numeric: false
@@ -143,7 +144,7 @@ function App() {
                 key={i}
                 variant="head"
                 align={column.numeric || false ? 'center' : 'center'}
-                style={{ width: column.width, padding: 0, height: column.height }}
+                style={{ width: column.width, padding: 0, height: column.height,maxWidth:'75px' }}
               >
                 {
                   column.type == 'day' && moment(column.label).format('ddd')
@@ -314,8 +315,9 @@ function App() {
           <div className='h-[7.5%] p-1  flex gap-5'>
             <div className='border-none w-full border-[#ffffff26] px-5 py-1 rounded-lg text-center flex items-center justify-between'>
               <div className='text-left flex  flex-col gap-2' style={{ lineHeight: 1 }}>
-                <span style={{ color: 'rgb(111 183 255)' }}>RUNNING CODE</span>
-                <div className='flex items-center gap-1 pl-3'><StarsIcon style={{ fontSize: '14px', color: 'rgb(255 241 0)' }} /><span className='text-[1.5rem]'>{RunningCode}</span></div>
+              <span className='text-[#000000] font-semibold'>{dayjs().format('YYYYMMDD')}001</span>
+                <span className='text-[#b3b3b3] text-[1rem]'>RUNNING CODE</span>
+                {/* <div className='flex items-center gap-1 pl-3'><StarsIcon style={{ fontSize: '14px', color: 'rgb(255 241 0)' }} /><span className='text-[1.5rem]'>{RunningCode}</span></div> */}
               </div>
               <div>
                 <Button className='ml-3' variant='contained' onClick={() => {
@@ -341,12 +343,12 @@ function App() {
                         <Paper elevation={2}>
                           <Table id="tbContent" className='w-auto'>
                             <TableBody>
-                              <TableRow>
-                                <TableCell className='stuck text-center align-top  text-[1rem] font-bold p-0 w-[400px] ' colSpan={2} rowSpan={10}>
-                                  <Table className='w-[100%] tbTitle shadow-xl '>
+                              <TableRow className='bg-white'>
+                                <TableCell className='stuck text-center align-top  text-[1rem] font-bold p-0 w-[400px] ' colSpan={2} rowSpan={5}>
+                                  <Table className='w-[400px] tbTitle shadow-xl '>
                                     <TableBody>
                                       <TableRow>
-                                        <TableCell rowSpan={10} className='pl-1 pr-1 py-1 align-top'>
+                                        <TableCell rowSpan={5} className='pl-1 pr-1 py-1 align-top'>
                                           <Stack direction='column' gap={1}>
                                             <div className='nmb-2 partDetail shadow-xl'>
                                               <Stack>
@@ -390,7 +392,7 @@ function App() {
                               }
                               {
                                 reducer.titles[3].checked && <TableRow>
-                                  <ItemCell dataSet={plan[part]} bgColor='bg-[#2f6543]' keyShow='doPlan' endDate={endDate}></ItemCell>
+                                  <ItemCell dataSet={plan[part]}  keyShow='doPlan' endDate={endDate}></ItemCell>
                                 </TableRow>
                               }
                               {
