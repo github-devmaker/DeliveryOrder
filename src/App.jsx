@@ -144,7 +144,7 @@ function App() {
                 key={i}
                 variant="head"
                 align={column.numeric || false ? 'center' : 'center'}
-                style={{ width: column.width, padding: 0, height: column.height,maxWidth:'75px' }}
+                style={{ width: column.width, padding: 0, height: column.height, maxWidth: '75px' }}
               >
                 {
                   column.type == 'day' && moment(column.label).format('ddd')
@@ -250,9 +250,6 @@ function App() {
   }
   return (
     <>
-      {/* {
-      JSON.stringify(reducer)
-    } */}
       {
         reducer.login ? <div className='h-screen overflow-hidden'>
           <div className='flex items-center justify-between h-[6.5%] px-[2rem] bg-[#1d1d1d]' >
@@ -263,6 +260,13 @@ function App() {
               <IconButton style={{ background: red[400] }} onClick={() => setOpenDialogLogout(true)}><ExitToAppRoundedIcon className='' /></IconButton>
             </div>
           </div >
+          <Box>
+            <Stack direction={'row'} className='bg-[#dddddd]'>
+              <Typography className='px-6 py-1'>Monitor Plan</Typography>
+              <Typography className='px-6 py-1'>Suppiler</Typography>
+              <Typography className='px-6 py-1'>Monitor Stock</Typography>
+            </Stack>
+          </Box>
           <Divider light={true} />
           <div className='h-[7.5%] flex justify-between items-center px-6'>
             <div className=' px-2 py-1 rounded-lg border' >
@@ -315,7 +319,7 @@ function App() {
           <div className='h-[7.5%] p-1  flex gap-5'>
             <div className='border-none w-full border-[#ffffff26] px-5 py-1 rounded-lg text-center flex items-center justify-between'>
               <div className='text-left flex  flex-col gap-2' style={{ lineHeight: 1 }}>
-              <span className='text-[#000000] font-semibold'>{dayjs().format('YYYYMMDD')}001</span>
+                <span className='text-[#000000] font-semibold'>{dayjs().format('YYYYMMDD')}001</span>
                 <span className='text-[#b3b3b3] text-[1rem]'>RUNNING CODE</span>
                 {/* <div className='flex items-center gap-1 pl-3'><StarsIcon style={{ fontSize: '14px', color: 'rgb(255 241 0)' }} /><span className='text-[1.5rem]'>{RunningCode}</span></div> */}
               </div>
@@ -392,7 +396,7 @@ function App() {
                               }
                               {
                                 reducer.titles[3].checked && <TableRow>
-                                  <ItemCell dataSet={plan[part]}  keyShow='doPlan' endDate={endDate}></ItemCell>
+                                  <ItemCell dataSet={plan[part]} keyShow='doPlan' endDate={endDate}></ItemCell>
                                 </TableRow>
                               }
                               {
@@ -420,7 +424,7 @@ function App() {
                                   <ItemCell dataSet={plan[part]} keyShow='po' _class='poVal' endDate={endDate}></ItemCell>
                                 </TableRow>
                               }
-                           
+
                             </TableBody>
                           </Table>
                         </Paper>

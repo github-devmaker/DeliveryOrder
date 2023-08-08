@@ -21,11 +21,17 @@ const initialState = {
         "Thu",
         "Fri",
         "Sat"
-    ]
+    ],
+    vender: []
 }
 
 const IndexReducer = (state = initialState, action) => {
     switch (action.type) {
+        case 'SET_VENDER':
+            return {
+                ...state,
+                vender: action.payload
+            }
         case 'CLEAR_LOGIN':
             return {
                 ...state,
