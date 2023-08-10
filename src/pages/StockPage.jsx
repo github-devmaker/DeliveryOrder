@@ -1,28 +1,11 @@
 import { Button, ButtonGroup, Checkbox, CircularProgress, Divider, FormControl, FormControlLabel, FormGroup, Grid, IconButton, InputBase, InputLabel, MenuItem, Paper, Select, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import DoneIcon from '@mui/icons-material/Done';
-import CheckIcon from '@mui/icons-material/Check';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { faker } from '@faker-js/faker';
-import { CheckBox } from '@mui/icons-material';
 import axios from 'axios';
 import { ServiceGetPlan } from '../Services';
-import SearchIcon from '@mui/icons-material/Search';
 import dayjs from 'dayjs';
-
+import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
 function PartPage() {
     const [supplierSelected, setSupplierSelected] = useState('');
     const [supplier, setSupplier] = useState([]);
@@ -32,6 +15,26 @@ function PartPage() {
     const [master, setMaster] = useState([]);
     const [data, setData] = useState([]);
     const [dataDefault, setDataDefault] = useState([]);
+    const selectStyle = {
+        height: '1.75rem',
+        color: 'white',
+        fontSize: '14px',
+        lineHeight: 2,
+        '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#4effca60'
+        },
+        '& .MuiSvgIcon-root': {
+            color: '#4effca'
+        },
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#4effca',
+        },
+        "&:hover": {
+            "&& fieldset": {
+                border: "1px solid #4effca50"
+            }
+        }
+    }
     function PuVal(props) {
         var percent = (props.po / props.usage) * 100;
         if (props.po == 0) {
@@ -78,7 +81,7 @@ function PartPage() {
                 if (supplierSelected == '') {
                     setSupplierSelected(res.data[0].vender)
                 }
-                resolve(res.data)
+                resolve(res.data[0].vender)
             }).catch((error) => {
                 console.log(error)
             })
@@ -122,7 +125,7 @@ function PartPage() {
             var dataFinal = [];
             Object.keys(planBuff).forEach(element => {
                 let percent = ((planBuff[element].stock / planBuff[element].plan) * 100).toFixed(2);
-                if(planBuff[element].plan == 0){
+                if (planBuff[element].plan == 0) {
                     percent = 100;
                 }
                 planBuff[element]['percent'] = percent;
@@ -151,10 +154,9 @@ function PartPage() {
         var dtLoop = dayjs();
         var dtNow = dayjs().format('YYYYMMDD');
         var dtTo = dayjs(dtNow).add(event.target.value, 'day').format('YYYYMMDD');
-        var dataBuff = (res.data.data).filter(item => {
+        (res.data.data).filter(item => {
             dtLoop = dayjs(item.date).format('YYYYMMDD');
             var stock = 0;
-
             if (typeof planBuff[item.part] == 'undefined') {
                 planBuff[item.part] = {
                     stock: 0,
@@ -185,11 +187,20 @@ function PartPage() {
     const handleGetData = () => {
         getPlan(supplierSelected);
     }
+    const themeLight = {
+        bg: '#ffffff',
+        color: '#1f1f1f'
+    };
+    const themeNight = {
+        bg: '#1f1f1f',
+        color: '#dfdfdf'
+    };
+    const [themeSys, setThemeSys] = useState(true);
     var once = false;
     useEffect(() => {
         async function getData() {
-            await getListSupplier();
-            await getPlan(supplierSelected);
+            const supplier = await getListSupplier();
+            await getPlan(supplier);
         }
         if (!once) {
             getData();
@@ -198,46 +209,47 @@ function PartPage() {
     }, [])
 
     return (
-        <div>
-            <Grid container>
-                <Grid item xs={12} className='px-6 pt-3 pb-0'>
-                    <Paper className='pt-2 pl-1 pb-1'>
-                        <Stack className='px-3 pt-1 pb-2' direction={'row'} spacing={2} alignItems={'center'} justifyContent={'space-between'}>
-                            <span className='text-[#1976d2] text-[1rem]'>FILTER</span>
-                            <FormControl fullWidth size='small' focused>
-                                <InputLabel id="demo-simple-select-label">SUPPLIER</InputLabel>
-                                <Select label="SUPPLIER" value={supplierSelected} onChange={handleChangeSupplier}>
-                                    {
-                                        supplier.map((item, index) => (
-                                            <MenuItem value={item.vender} key={item.vender}>{item.venderName} ({item.vender})</MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                            </FormControl>
-                            <FormControl fullWidth size='small' focused>
-                                <InputLabel id="demo-simple-select-label">View</InputLabel>
-                                <Select label="View" value={filterType} onChange={handleChangeFilterType}>
-                                    <MenuItem value={'stock-more'}>Stock มาก</MenuItem>
-                                    <MenuItem value={'stock-less'}>Stock น้อย</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <FormControl fullWidth size='small' focused>
-                                <InputLabel id="demo-simple-select-label">PD/LT</InputLabel>
-                                <Select label="PD/LT" value={filterPdLt} onChange={handleChangeFilterPdLt}>
-                                    <MenuItem value={1}>1</MenuItem>
-                                    <MenuItem value={2}>2</MenuItem>
-                                    <MenuItem value={3}>3</MenuItem>
-                                    <MenuItem value={4}>4</MenuItem>
-                                    <MenuItem value={5}>5</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <Button variant='contained' className='min-w-[100px]' onClick={handleGetData}><SearchIcon />Search</Button>
+        <div className='stock-page w-full'>
+            <div className={`overflow-hidden w-full h-full p-6  ${themeSys ? 'night' : 'light'}`}>
+                <div className='flex gap-2 box-filter line-b'>
+                    <span className='text-[1rem] text-mtr'>FILTER</span>
+                    <FormControl fullWidth size='small' focused>
+                        <InputLabel id="demo-simple-select-label">SUPPLIER</InputLabel>
+                        <Select label="SUPPLIER" value={supplierSelected} onChange={handleChangeSupplier} sx={selectStyle}>
+                            {
+                                supplier.map((item, index) => (
+                                    <MenuItem value={item.vender} key={item.vender}>{item.venderName} ({item.vender})</MenuItem>
+                                ))
+                            }
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth size='small' focused>
+                        <InputLabel id="demo-simple-select-label">View</InputLabel>
+                        <Select label="View" value={filterType} onChange={handleChangeFilterType} sx={selectStyle}>
+                            <MenuItem value={'stock-more'}>Stock มาก</MenuItem>
+                            <MenuItem value={'stock-less'}>Stock น้อย</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth size='small' focused>
+                        <InputLabel id="demo-simple-select-label">PD/LT</InputLabel>
+                        <Select label="PD/LT" value={filterPdLt} onChange={handleChangeFilterPdLt} sx={selectStyle}>
+                            <MenuItem value={1}>1</MenuItem>
+                            <MenuItem value={2}>2</MenuItem>
+                            <MenuItem value={3}>3</MenuItem>
+                            <MenuItem value={4}>4</MenuItem>
+                            <MenuItem value={5}>5</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <div className={`bg-[#4effca] text-[#080b0f] w-fit rounded-[8px] px-[8px] pt-[0px] pb-[4px] cursor-pointer transition ease-in-out delay-50  hover:-translate-y-1 hover:scale-105 hover:bg-[#4effca] hover:text-[#080b0f] duration-300 shadow-mtr w-fit`} onClick={handleGetData}>
+                        <Stack alignItems={'center'} direction={'row'}>
+                            <ElectricBoltIcon className='text-[.75vw] mr-1' />
+                            <span className='text-center'>ค้นหา</span>
                         </Stack>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} className='px-6 pt-3 pb-6'>
+                    </div>
+                </div>
+                <div className='px-4 py-4 h-100 box-content'>
                     <TableContainer component={Paper}>
-                        <Table size='small'>
+                        <Table size='small' className='tbContent'>
                             <TableHead>
                                 <TableRow>
                                     <TableCell className='font-semibold text-center'>DRAWING NO.</TableCell>
@@ -248,14 +260,13 @@ function PartPage() {
                                     <TableCell className='font-semibold text-center bg-blue-200'>PERIOD PLAN</TableCell>
                                     <TableCell className='py-3 font-semibold text-center bg-blue-200'>REQUIRE PLAN</TableCell>
                                     <TableCell className='font-semibold text-center bg-yellow-200'>P/S STOCK</TableCell>
-                                    {/* <TableCell className='text-right font-semibold'>PURCHASE ORDER</TableCell> */}
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {
                                     loadingData ? <TableRow><TableCell colSpan={8}><div className='flex flex-col p-3 justify-center items-center gap-2'><CircularProgress /><span>กำลังโหลดข้อมูล . . .</span></div></TableCell></TableRow> : (
                                         data.length ? data.map((item, index) => {
-                                            return <TableRow>
+                                            return <TableRow key = {index}>
                                                 <TableCell className='font-semibold'>{item.code} </TableCell>
                                                 <TableCell className='font-semibold'>{item.cm}</TableCell>
                                                 <TableCell className='font-semibold'>{typeof item.desc != 'undefined' ? item.desc : 'PACKAGING'}</TableCell>
@@ -263,7 +274,7 @@ function PartPage() {
                                                 <TableCell className='font-semibold'>{typeof item.unit != 'undefined' ? item.unit : '-'}</TableCell>
                                                 <TableCell className='font-semibold text-center bg-blue-50'>{item.period} </TableCell>
                                                 <TableCell className='text-right font-semibold bg-blue-50'><NumericFormat value={item.plan} displayType='text' className='text-3xl' thousandSeparator="," /></TableCell>
-                                                <TableCell className='text-right font-semibold bg-yellow-100'><StockInHouseVal usage={item.plan} stock={item.stock}  /></TableCell>
+                                                <TableCell className='text-right font-semibold bg-yellow-100'><StockInHouseVal usage={item.plan} stock={item.stock} /></TableCell>
                                                 {/* <TableCell className='text-right font-semibold'><PuVal usage={2900} po={5800} /></TableCell> */}
                                             </TableRow>
                                         }) : <TableRow><TableCell colSpan={8} className='text-center p-3'>ไม่พบข้อมูล</TableCell></TableRow>
@@ -273,9 +284,10 @@ function PartPage() {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                </Grid>
-            </Grid>
+                </div>
+            </div>
         </div>
+
     )
 }
 

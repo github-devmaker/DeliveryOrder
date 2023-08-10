@@ -21,12 +21,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DiamondIcon from '@mui/icons-material/Diamond';
 import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
-import AbcIcon from '@mui/icons-material/Abc';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import CircleIcon from '@mui/icons-material/Circle';
 import WidgetsIcon from '@mui/icons-material/Widgets';
-import AcUnitIcon from '@mui/icons-material/AcUnit';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 function PlanPage() {
@@ -35,9 +30,10 @@ function PlanPage() {
     const [parts, setParts] = useState([]);
     const [columns, setColumns] = useState([]);
     const [master, setMaster] = useState([]);
+    const [holiday,setHoliday] = useState([]);
     const [planDefault, setPlanDefault] = useState([]);
     const [ListSupplier, SetListSupplier] = useState([]);
-    const [SupplierSelected, SetSupplierSelected] = useState('191012');
+    const [SupplierSelected, SetSupplierSelected] = useState('012016');
     const [loading, setLoading] = useState(true);
     const [msgNoData, setMsgNoData] = useState(false);
     const [openApprDo, setOpenApprDo] = useState(false);
@@ -49,7 +45,6 @@ function PlanPage() {
     const [openFilter, setOpenFilter] = useState(false);
     const [openViewDetailDrawing, setOpenViewDetailDrawing] = useState(false);
     const [drawingDetail, setDrawingDetail] = useState([]);
-    const [openWarning, setOpenWarning] = useState(true);
     const reducer = useSelector(state => state.mainReducer);
     const dispatch = useDispatch();
     var startDate = moment().add(-7, 'days').format('YYYY-MM-DD');
@@ -90,12 +85,13 @@ function PlanPage() {
         ServiceGetPlan(SupplierCode).then((res) => {
             console.log(res.data)
             setLoading(false);
+            setHoliday(res.data.holiday.map(el => el.code));
             setRunningCode(res.data.runningCode != '' ? res.data.runningCode : '-');
             if (Object.keys(res.data.data).length) {
                 setMaster(res.data.master);
                 var newPlan = [];
                 setPlanDefault(res.data.data);
-                res.data.data.map((item, index) => {
+                res.data.data.map((item) => {
                     if (typeof newPlan[item.part] == 'undefined') {
                         newPlan[item.part] = []
                     }
@@ -217,7 +213,6 @@ function PlanPage() {
     }
     function ApprDo() {
         ServiceRunDo({ plan: planDefault, master: master }).then((res) => {
-            console.log(res.data);
             try {
                 if (res.status == 200) {
                     if (res.data.runningCode != "" && typeof res.data.runningCode != 'undefined') {
@@ -230,7 +225,6 @@ function PlanPage() {
                 }
                 setDisabledBtnApprDo(false);
             } catch (e) {
-                console.log(e);
                 setDisabledBtnApprDo(false);
                 setMsgWaitApprDo('ไม่สามารถออกแผน Delivery Order ได้ กรุณาติดต่อทีมงาน IT (เบียร์ 250)');
             }
@@ -251,26 +245,18 @@ function PlanPage() {
         ApprDo();
     }
 
-    const handleViewDetailDrawing = (partNo) => {
-        master[partNo].partNo = partNo
-        setDrawingDetail(master[partNo])
-        setOpenViewDetailDrawing(true);
-    }
     return (
         <>
             {
                 reducer.login ? <div className={`overflow-hidden w-full  p-6 ${themeSys ? 'night' : 'light'}`}>
                     <Grid container className='sm:h-auto bg-[#181818]  pl-4 line-b'>
                         <Grid item xs={11.25} className='flex items-center'>
-                            <AirportShuttleIcon className='text-md text-[#4effca] animate-pulse' />
+                            <AirportShuttleIcon className='text-md text-[#4effca]' />
                             <FormControl fullWidth className=' py-2 px-2'>
                                 <Select
                                     inputProps={{ readOnly: loading }}
-                                    // labelId="demo-simple-select-label"
-                                    // id="demo-simple-select"
                                     size='small'
                                     value={SupplierSelected}
-                                    // onChange={(e) => ChangeSupplier(e.target.value)}
                                     onChange={handleSupplier}
                                     sx={{
                                         height: '1.75rem',
@@ -319,37 +305,12 @@ function PlanPage() {
                         </div>
                     </div>
                     <div className='flex w-full h-full box-content'>
-                        <div className='sm:w-[30%] md:w-[25%] lg:w-[20%] xl:w-[15%] 2xl:w-[15%] text-white box-state'>
-                            <List>
-                                <ListItemButton className='px-3 py-0'>
-                                    <ListItemIcon className='text-white min-w-[14px]'>
-                                        {openWarning ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                                    </ListItemIcon>
-                                    <ListItemText primary="Drawing State" />
-                                </ListItemButton>
-                                <Collapse in={openWarning} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        {
-                                            [...Array(10)].map((itemDrawing, index) => (
-                                                <ListItemButton key={index} className='py-0 hover:bg-[#4effca15]' sx={{ pl: 4 }}>
-                                                    <ListItemIcon className='sm:min-w-[6px] md:min-w-[8px] mr-2  border-l-3 border-[#fff]'>
-                                                        <CircleIcon className='text-[#d84949] text-[14px]' />
-                                                    </ListItemIcon>
-                                                    <span className='sm:text-[1.5vw] md:text-[1.7vw] lg:text-[.85vw]'>Drawing ABCD</span>
-                                                </ListItemButton>
-                                            ))
-                                        }
-                                    </List>
-                                </Collapse>
-                            </List>
-                        </div>
-                        <div className={`h-[93%] w-full text-center ${themeSys ? 'night' : 'light'}`}>
+                        <div className={`h-[93%] w-full text-center pl-6`}>
                             {
                                 loading ? <div className='flex flex-col justify-center items-center h-full loading'><CircularProgress style={{ color: '#4effca' }} /><span className=' mt-3'>กำลังโหลดข้อมูล . . .</span></div> : <>
                                     {
                                         msgNoData ? <div className=' h-full flex items-center justify-center'>ไม่พบข้อมูลการผลิต . . . </div> : <TableVirtuoso
                                             id='tbDo'
-                                            // style={{ backgroundColor: '#202026' }}
                                             data={parts}
                                             components={VirtuosoTableComponents}
                                             fixedHeaderContent={fixedHeaderContent}
@@ -389,7 +350,6 @@ function PlanPage() {
                                                                                                         <span> MAX : </span>
                                                                                                         <span className='maxVal'>{master[part]?.vdMaxDelivery != 99999 ? master[part]?.vdMaxDelivery : '-'}</span>
                                                                                                     </div>
-                                                                                                    {/* <IconButton size='small' className='p-1' onClick={() => handleViewDetailDrawing(part)}><SearchIcon fontSize='small' className='text-white' /></IconButton> */}
                                                                                                 </Stack>
                                                                                             </div>
                                                                                         </Stack>
@@ -427,7 +387,7 @@ function PlanPage() {
                                                                 }
                                                                 {
                                                                     reducer.titles[3].checked && <TableRow>
-                                                                        <ItemCell dataSet={plan[part]} keyShow='doPlan' _class='doPlanVal' endDate={endDate} master = {master} part={part}></ItemCell>
+                                                                        <ItemCell dataSet={plan[part]} keyShow='doPlan' _class='doPlanVal' endDate={endDate} master={master} holiday = {holiday} part={part}></ItemCell>
                                                                     </TableRow>
                                                                 }
                                                                 {
@@ -471,177 +431,6 @@ function PlanPage() {
                             }
                         </div >
                     </div>
-                    {/* <div className='h-[7.5%] flex justify-between items-center px-6 bg-white'>
-                        <div className=' px-3 py-1 rounded-lg border' >
-                            <Stack direction="row" alignItems="center" gap={1}>
-                                <HomeIcon fontSize='14px' /><span>Supplier</span>
-                            </Stack>
-                        </div>
-                        <div className='w-full p-3'>
-                            <FormControl fullWidth>
-                                <Select
-                                    inputProps={{ readOnly: loading }}
-                                    // labelId="demo-simple-select-label"
-                                    // id="demo-simple-select"
-                                    size='small'
-                                    value={SupplierSelected}
-                                    // onChange={(e) => ChangeSupplier(e.target.value)}
-                                    onChange={handleSupplier}
-                                    sx={{
-                                        height: '2.5rem',
-                                        // color: 'white',
-                                        // '& .MuiOutlinedInput-notchedOutline': {
-                                        //   borderColor: '#a3a3a326'
-                                        // },
-                                        // '& .MuiSvgIcon-root': {
-                                        //   color: 'white'
-                                        // },
-                                        // '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                        //   borderColor: 'white',
-                                        // },
-                                        // "&:hover": {
-                                        //   "&& fieldset": {
-                                        //     border: "2px solid white"
-                                        //   }
-                                        // }
-                                    }}
-                                >
-                                    {
-                                        ListSupplier.map((sp) => {
-                                            return <MenuItem value={sp.vender} key={sp.vender}>{sp.venderName} ({sp.vender})</MenuItem>
-                                        })
-                                    }
-                                </Select>
-                            </FormControl>
-                        </div>
-                        <div>
-                            <Button variant='outlined' onClick={() => setOpenFilter(true)}><FilterAltOffOutlinedIcon />&nbsp;Filter</Button>
-                        </div>
-                    </div>s
-                    <Divider light={true} /> */}
-                    {/* <div className='h-[7.5%] p-1  flex gap-5 bg-white'>
-                        <div className='border-none w-full border-[#ffffff26] px-5 py-1 rounded-lg text-center flex items-center justify-between'>
-                            <div className='text-left flex  flex-col gap-2' style={{ lineHeight: 1 }}>
-                                <span className='text-[#000000] font-semibold'>{dayjs().format('YYYYMMDD')}001</span>
-                                <span className='text-[#b3b3b3] text-[1rem] pl-3'>RUNNING CODE</span> */}
-                    {/* <div className='flex items-center gap-1 pl-3'><StarsIcon style={{ fontSize: '14px', color: 'rgb(255 241 0)' }} /><span className='text-[1.5rem]'>{RunningCode}</span></div> */}
-                    {/* </div>
-                            <div>
-                                <Button className='ml-3' variant='contained' onClick={() => {
-                                    setShowBtnRunDo(true);
-                                    setOpenApprDo(true);
-                                }} ><CheckIcon fontSize='small' />&nbsp;Start D/O Plan</Button>
-                            </div>
-                        </div>
-                    </div>
-                    <Divider light={true} /> */}
-                    {/* <div className='h-[75%] text-center bg-[#f4f4f4]' >
-                        {
-                            loading ? <div className='flex flex-col justify-center items-center h-full'><CircularProgress /><span className=' mt-3'>กำลังโหลดข้อมูล . . .</span></div> : <>
-                                {
-                                    msgNoData ? <div className=' h-full flex items-center justify-center'>ไม่พบข้อมูลการผลิต . . . </div> : <TableVirtuoso
-                                        id='tbDo'
-                                        // style={{ backgroundColor: '#202026' }}
-                                        data={parts}
-                                        components={VirtuosoTableComponents}
-                                        fixedHeaderContent={fixedHeaderContent}
-                                        itemContent={(index, part) => (
-                                            <TableCell key={index} colSpan={63} className='p-0 cursor-pointer' style={{ borderBottomWidth: 0 }}>
-                                                <Paper elevation={2}>
-                                                    <Table id="tbContent" className='w-auto'>
-                                                        <TableBody>
-                                                            <TableRow className='bg-white'>
-                                                                <TableCell className='stuck text-center align-top  text-[1rem] font-bold p-0 w-[400px] ' colSpan={2} rowSpan={10}>
-                                                                    <Table className='w-[400px] tbTitle shadow-xl '>
-                                                                        <TableBody>
-                                                                            <TableRow>
-                                                                                <TableCell rowSpan={10} className='pl-1 pr-1 py-1 align-top'>
-                                                                                    <Stack direction='column' gap={1}>
-                                                                                        <div className='nmb-2 partDetail shadow-xl'>
-                                                                                            <Stack>
-                                                                                                <Typography className='font-semibold'>{part} {master[part]?.partCm} </Typography>
-                                                                                                <Typography className='text-[14px]'>{(master[part]?.partDesc != '' && typeof master[part]?.partDesc != 'undefined') ? ('(' + master[part]?.partDesc + ')') : '-'}</Typography>
-                                                                                                <IconButton size='small' className='p-1' onClick={() => handleViewDetailDrawing(part)}><SearchIcon fontSize='small' className='text-white' /></IconButton>
-                                                                                            </Stack>
-                                                                                        </div>
-                                                                                    </Stack>
-                                                                                </TableCell>
-                                                                            </TableRow>
-                                                                            {
-                                                                                reducer.titles.map((item, index) => {
-                                                                                    return item.checked && <TableRow key={index}>
-                                                                                        <TableCell className='stuck px-0 h-[40px] p-0 text-[#dddddd] w-[200px] border-0'>
-                                                                                            <div className='flex items-center gap-2 pl-2'>
-                                                                                                <span className={`title ${item.name}`}>{item.label}</span>
-                                                                                            </div>
-                                                                                        </TableCell>
-                                                                                    </TableRow>
-                                                                                })
-                                                                            }
-                                                                        </TableBody>
-                                                                    </Table>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                            {
-                                                                reducer.titles[0].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='plan' _class=' planVal' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            {
-                                                                reducer.titles[1].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='picklist' textColor='text-red-400' _class='pickListVal' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            {
-                                                                reducer.titles[2].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='ProdUse' _class='prodUseVal' textColor='' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            {
-                                                                reducer.titles[3].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='doPlan' _class='doPlanVal' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            {
-                                                                reducer.titles[4].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='doAct' _class='doActVal' textColor='text-teal-300' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            {
-                                                                reducer.titles[5].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='doBalance' _class='wipVal' textColor='' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            {
-                                                                reducer.titles[6].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='stock' _class='stockVal' textColor='text-orange-400' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            {
-                                                                reducer.titles[7].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='stockSim' _class='stockSimVal' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            {
-                                                                reducer.titles[8].checked && <TableRow>
-                                                                    <ItemCell dataSet={plan[part]} keyShow='po' _class='poVal' endDate={endDate}></ItemCell>
-                                                                </TableRow>
-                                                            }
-                                                            <TableRow>
-                                                                <TableCell colSpan={63} className='p-0 bg-[#ebebeb]'>&nbsp;</TableCell>
-                                                            </TableRow>
-
-                                                        </TableBody>
-                                                    </Table>
-                                                </Paper>
-                                            </TableCell>
-                                        )}
-                                    />
-                                }
-
-                            </>
-                        }
-                    </div > */}
                     <Dialog open={openApprDo} >
                         <DialogTitle id="alert-dialog-title">
                             {"คุณต้องการออกแผน Delivery Order ใช่หรือไม่ ?"}
@@ -657,7 +446,6 @@ function PlanPage() {
                             }
                         </DialogContent>
                         <DialogActions>
-                            {/* <Button onClick={testAction}>test</Button> */}
                             <Button onClick={handleCloseApprDo} disabled={disabledBtnApprDo && 'disabled'}>ปิดหน้าต่าง</Button>
                             {
                                 showBtnRunDo && <Button onClick={confirmApprDo} autoFocus variant='contained' disabled={disabledBtnApprDo && 'disabled'}>

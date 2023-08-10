@@ -1,7 +1,7 @@
 import { ExitToAppRounded } from '@mui/icons-material'
 import PaidIcon from '@mui/icons-material/Paid';
-import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, Stack, Typography } from '@mui/material'
-import { red } from '@mui/material/colors';
+import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, IconButton, Stack, Switch, Typography } from '@mui/material'
+import { deepOrange, red } from '@mui/material/colors';
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -20,20 +20,31 @@ function MainAppbar() {
         dispatch({ type: 'CLEAR_LOGIN' });
         setOpenDialogLogout(false);
     }
+    const label = { inputProps: { 'aria-label': 'Switch demo' } };
     return (
-        <Grid container className='w-full h-[7%] bg-[#37393c]  text-[#ececec] shadow-lg'>
-            <Grid item xs={4} md={5} lg={6} className='flex items-center gap-0 pl-[16px]'>
-                <PaidIcon className='text-[2vw] text-[#4effca] drop-shadow-lg'/>
+        <div className='w-full h-[7%] bg-[#37393c]  text-[#ececec] shadow-lg flex justify-between'>
+            <div className='flex items-center gap-0 pl-[16px]'>
+                <PaidIcon className='text-[2vw] text-[#4effca] drop-shadow-lg' />
                 <Stack className='select-none h-[93%] pl-[8px] gap-1' justifyContent={'center'} >
                     <Typography className='flex  gap-1 items-center text-[#4effca] sm:text-[2.5vw] md:text-[2vw] lg:text-[2.2vw] xl:text-[1.8vw] 2xl:text-[1.35vw]  transition-all duration-200 leading-none' variant="caption" >
-                        PURCHASE DASHBOARD
+                        DELIVERY ORDER
                     </Typography>
                     <Typography className='text-[#fff] text-md leading-none ' variant="caption" >
                         หน่วยงานจัดหาสินค้า หรือบริการที่ต้องการมาสู่องค์กร
                     </Typography>
                 </Stack>
-            </Grid>
-        </Grid>
+            </div>
+            <div className='text-right'>
+                <div className='w-fit h-full flex items-center gap-2 pr-3'>
+                    <div className=''>
+                        <span>Theme</span>
+                        <Switch {...label} defaultChecked />
+                    </div>
+                    <span>PEERAPONG.K</span>
+                    <Avatar sx={{ bgcolor: deepOrange[500] }}>P</Avatar>
+                </div>
+            </div>
+        </div>
         // <>
         //     <div>
         //         <div className='flex items-center justify-between px-[2rem] py-[.5rem] bg-[#1d1d1d]' >

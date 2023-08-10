@@ -22,7 +22,8 @@ const initialState = {
         "Fri",
         "Sat"
     ],
-    vender: []
+    vender: [],
+    menuIndex: 0
 }
 
 const IndexReducer = (state = initialState, action) => {
@@ -31,6 +32,11 @@ const IndexReducer = (state = initialState, action) => {
             return {
                 ...state,
                 vender: action.payload
+            }
+        case 'NAV_MENU_SELECT':
+            return {
+                ...state,
+                menuIndex: action.payload
             }
         case 'CLEAR_LOGIN':
             return {
