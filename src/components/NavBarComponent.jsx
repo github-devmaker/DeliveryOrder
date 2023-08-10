@@ -35,9 +35,6 @@ function NavBarComponent() {
 
     return (
         <div className='flex items-center flex-col md:w-[10%] lg:w-[8%] xl:w-[7.5%] 2xl:w-[6%] md:text-[1vw] lg:text-[1vw] xl:text-[.75vw] bg-[#37393c] text-[#ececec]  gap-[8px] pt-[8px] pl-[8px] pr-[8px] select-none'>
-            {
-                reducer.menuIndex
-            }
             <Divider className='bg-[#4effca] border-2 w-[65%] rounded-lg mb-2' />
             {
                 menu.map((item, key) => (

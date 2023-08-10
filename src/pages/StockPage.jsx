@@ -1,11 +1,11 @@
 import { Button, ButtonGroup, Checkbox, CircularProgress, Divider, FormControl, FormControlLabel, FormGroup, Grid, IconButton, InputBase, InputLabel, MenuItem, Paper, Select, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import axios from 'axios';
-import { ServiceGetPlan } from '../Services';
+import { GET_STOCK, ServiceGetPlan } from '../Services';
 import dayjs from 'dayjs';
 import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
+import { makeStyles } from '@mui/styles';
 function PartPage() {
     const [supplierSelected, setSupplierSelected] = useState('');
     const [supplier, setSupplier] = useState([]);
@@ -35,23 +35,6 @@ function PartPage() {
             }
         }
     }
-    function PuVal(props) {
-        var percent = (props.po / props.usage) * 100;
-        if (props.po == 0) {
-            percent = 0;
-        }
-        return <div className='flex justify-end items-center gap-2'>
-            <span class="inline-block animate-bounce rounded-full p-1 bg-red-400 text-white text-sm"><svg class="w-4 h-4 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
-            </svg></span>
-            <div>
-                <Typography className='text-red-500 font-semibold'><ArrowDropUpIcon />({percent}%)</Typography>
-                <NumericFormat value={props.po} displayType='text' thousandSeparator="," className='text-2xl' />
-            </div>
-            {/* <Line options={options} data={data} /> */}
-
-        </div>
-    }
 
     function StockInHouseVal(props) {
         var percent = ((props.stock / props.usage) * 100).toFixed(2);
@@ -59,13 +42,6 @@ function PartPage() {
             percent = 0;
         }
         return <div className='flex justify-end items-center gap-2'>
-            {/* {
-                percent > 100 && <span class="inline-block animate-bounce rounded-full p-1 bg-teal-400 text-white text-sm">
-                    <svg class="w-4 h-4 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7" />
-                    </svg>
-                </span>
-            } */}
             <div>
                 {
                     percent > 100 ? <Typography className='text-red-500 font-semibold'>({percent}%)</Typography> : <Typography className='text-green-600 font-semibold'>({percent}%)</Typography>
@@ -96,7 +72,6 @@ function PartPage() {
             console.log(res.data)
             setDataDefault(res.data.data);
             var masterBuff = res.data.master;
-            // var dataBuff = (res.data.data).sort((a, b) => (parseFloat(a.stock) > parseFloat(b.stock)) ? -1 : 1);
             var dtLoop = dayjs();
             var dataBuff = (res.data.data).filter(item => {
                 dtLoop = dayjs(item.date).format('YYYYMMDD');
@@ -150,7 +125,6 @@ function PartPage() {
     const handleChangeFilterPdLt = event => {
         setFilterPdLt(event.target.value);
         var planBuff = {}
-        // var dataBuff = dataDefault.sort((a, b) => (parseFloat(a.stock) > parseFloat(b.stock)) ? -1 : 1);
         var dtLoop = dayjs();
         var dtNow = dayjs().format('YYYYMMDD');
         var dtTo = dayjs(dtNow).add(event.target.value, 'day').format('YYYYMMDD');
@@ -187,20 +161,21 @@ function PartPage() {
     const handleGetData = () => {
         getPlan(supplierSelected);
     }
-    const themeLight = {
-        bg: '#ffffff',
-        color: '#1f1f1f'
-    };
-    const themeNight = {
-        bg: '#1f1f1f',
-        color: '#dfdfdf'
-    };
     const [themeSys, setThemeSys] = useState(true);
+    const tbStyle = makeStyles({
+        table: {
+            "& .MuiTableCell-root": {
+                border: '1px solid black'
+            }
+        }
+    })
     var once = false;
     useEffect(() => {
         async function getData() {
             const supplier = await getListSupplier();
-            await getPlan(supplier);
+            const data = await GET_STOCK({ vender: supplier, startDate: dayjs().format('YYYYMMDD'), endDate: dayjs().add(7, 'day').format('YYYYMMDD') });
+            setData(data);
+            setLoadingData(false);
         }
         if (!once) {
             getData();
@@ -209,85 +184,87 @@ function PartPage() {
     }, [])
 
     return (
-        <div className='stock-page w-full'>
-            <div className={`overflow-hidden w-full h-full p-6  ${themeSys ? 'night' : 'light'}`}>
-                <div className='flex gap-2 box-filter line-b'>
-                    <span className='text-[1rem] text-mtr'>FILTER</span>
-                    <FormControl fullWidth size='small' focused>
-                        <InputLabel id="demo-simple-select-label">SUPPLIER</InputLabel>
-                        <Select label="SUPPLIER" value={supplierSelected} onChange={handleChangeSupplier} sx={selectStyle}>
-                            {
-                                supplier.map((item, index) => (
-                                    <MenuItem value={item.vender} key={item.vender}>{item.venderName} ({item.vender})</MenuItem>
-                                ))
-                            }
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth size='small' focused>
-                        <InputLabel id="demo-simple-select-label">View</InputLabel>
-                        <Select label="View" value={filterType} onChange={handleChangeFilterType} sx={selectStyle}>
-                            <MenuItem value={'stock-more'}>Stock มาก</MenuItem>
-                            <MenuItem value={'stock-less'}>Stock น้อย</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <FormControl fullWidth size='small' focused>
-                        <InputLabel id="demo-simple-select-label">PD/LT</InputLabel>
-                        <Select label="PD/LT" value={filterPdLt} onChange={handleChangeFilterPdLt} sx={selectStyle}>
-                            <MenuItem value={1}>1</MenuItem>
-                            <MenuItem value={2}>2</MenuItem>
-                            <MenuItem value={3}>3</MenuItem>
-                            <MenuItem value={4}>4</MenuItem>
-                            <MenuItem value={5}>5</MenuItem>
-                        </Select>
-                    </FormControl>
-                    <div className={`bg-[#4effca] text-[#080b0f] w-fit rounded-[8px] px-[8px] pt-[0px] pb-[4px] cursor-pointer transition ease-in-out delay-50  hover:-translate-y-1 hover:scale-105 hover:bg-[#4effca] hover:text-[#080b0f] duration-300 shadow-mtr w-fit`} onClick={handleGetData}>
-                        <Stack alignItems={'center'} direction={'row'}>
-                            <ElectricBoltIcon className='text-[.75vw] mr-1' />
-                            <span className='text-center'>ค้นหา</span>
-                        </Stack>
-                    </div>
-                </div>
-                <div className='px-4 py-4 h-100 box-content'>
-                    <TableContainer component={Paper}>
-                        <Table size='small' className='tbContent'>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell className='font-semibold text-center'>DRAWING NO.</TableCell>
-                                    <TableCell className='font-semibold text-center'>CM</TableCell>
-                                    <TableCell className='font-semibold text-center'>DESCRIPTION</TableCell>
-                                    <TableCell className='font-semibold text-center '>QTY/BOX</TableCell>
-                                    <TableCell className='font-semibold text-center'>UNIT</TableCell>
-                                    <TableCell className='font-semibold text-center bg-blue-200'>PERIOD PLAN</TableCell>
-                                    <TableCell className='py-3 font-semibold text-center bg-blue-200'>REQUIRE PLAN</TableCell>
-                                    <TableCell className='font-semibold text-center bg-yellow-200'>P/S STOCK</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
+        <div className='stock-page w-full flex'>
+            <div className={`overflow-hidden w-full p-6  ${themeSys ? 'night' : 'light'}`}>
+                <div className='flex flex-col w-full h-full box-content'>
+                    <div className='flex gap-2 box-filter line-b'>
+                        <span className='text-[1rem] text-mtr'>FILTER</span>
+                        <FormControl fullWidth size='small' focused>
+                            <InputLabel id="demo-simple-select-label">SUPPLIER</InputLabel>
+                            <Select label="SUPPLIER" value={supplierSelected} onChange={handleChangeSupplier} sx={selectStyle}>
                                 {
-                                    loadingData ? <TableRow><TableCell colSpan={8}><div className='flex flex-col p-3 justify-center items-center gap-2'><CircularProgress /><span>กำลังโหลดข้อมูล . . .</span></div></TableCell></TableRow> : (
-                                        data.length ? data.map((item, index) => {
-                                            return <TableRow key = {index}>
-                                                <TableCell className='font-semibold'>{item.code} </TableCell>
-                                                <TableCell className='font-semibold'>{item.cm}</TableCell>
-                                                <TableCell className='font-semibold'>{typeof item.desc != 'undefined' ? item.desc : 'PACKAGING'}</TableCell>
-                                                <TableCell className='font-semibold text-right'>{typeof item.boxQty != 'undefined' ? <NumericFormat value={item.boxQty} displayType='text' className='text-[14px]' thousandSeparator="," /> : '-'}</TableCell>
-                                                <TableCell className='font-semibold'>{typeof item.unit != 'undefined' ? item.unit : '-'}</TableCell>
-                                                <TableCell className='font-semibold text-center bg-blue-50'>{item.period} </TableCell>
-                                                <TableCell className='text-right font-semibold bg-blue-50'><NumericFormat value={item.plan} displayType='text' className='text-3xl' thousandSeparator="," /></TableCell>
-                                                <TableCell className='text-right font-semibold bg-yellow-100'><StockInHouseVal usage={item.plan} stock={item.stock} /></TableCell>
-                                                {/* <TableCell className='text-right font-semibold'><PuVal usage={2900} po={5800} /></TableCell> */}
-                                            </TableRow>
-                                        }) : <TableRow><TableCell colSpan={8} className='text-center p-3'>ไม่พบข้อมูล</TableCell></TableRow>
-                                    )
+                                    supplier.map((item, index) => (
+                                        <MenuItem value={item.vender} key={item.vender}>{item.venderName} ({item.vender})</MenuItem>
+                                    ))
                                 }
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth size='small' focused>
+                            <InputLabel id="demo-simple-select-label">View</InputLabel>
+                            <Select label="View" value={filterType} onChange={handleChangeFilterType} sx={selectStyle}>
+                                <MenuItem value={'stock-more'}>Stock มาก</MenuItem>
+                                <MenuItem value={'stock-less'}>Stock น้อย</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth size='small' focused>
+                            <InputLabel id="demo-simple-select-label">PD/LT</InputLabel>
+                            <Select label="PD/LT" value={filterPdLt} onChange={handleChangeFilterPdLt} sx={selectStyle}>
+                                <MenuItem value={1}>1</MenuItem>
+                                <MenuItem value={2}>2</MenuItem>
+                                <MenuItem value={3}>3</MenuItem>
+                                <MenuItem value={4}>4</MenuItem>
+                                <MenuItem value={5}>5</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <div className={`bg-[#4effca] text-[#080b0f] w-fit rounded-[8px] px-[8px] pt-[0px] pb-[4px] cursor-pointer transition ease-in-out delay-50  hover:-translate-y-1 hover:scale-105 hover:bg-[#4effca] hover:text-[#080b0f] duration-300 shadow-mtr w-fit`} onClick={handleGetData}>
+                            <Stack alignItems={'center'} direction={'row'}>
+                                <ElectricBoltIcon className='text-[.75vw] mr-1' />
+                                <span className='text-center'>ค้นหา</span>
+                            </Stack>
+                        </div>
+                    </div>
+                    <div className='h-full w-full text-center p-6'>
+                        <div className='flex w-full h-full'>
+                            <TableContainer component={Paper}>
+                                <Table size='small' className={`tbContent tbBorder`}>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell className='font-semibold text-center'>DRAWING NO.</TableCell>
+                                            <TableCell className='font-semibold text-center'>CM</TableCell>
+                                            <TableCell className='font-semibold text-center'>DESCRIPTION</TableCell>
+                                            <TableCell className='font-semibold text-center '>QTY/BOX</TableCell>
+                                            <TableCell className='font-semibold text-center'>UNIT</TableCell>
+                                            <TableCell className='font-semibold text-center bg-blue-200'>PERIOD PLAN</TableCell>
+                                            <TableCell className='py-3 font-semibold text-center bg-blue-200'>REQUIRE PLAN</TableCell>
+                                            <TableCell className='font-semibold text-center bg-yellow-200'>P/S STOCK</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {
+                                            loadingData ? <TableRow><TableCell colSpan={8}><div className='flex flex-col p-3 justify-center items-center gap-2'><CircularProgress /><span>กำลังโหลดข้อมูล . . .</span></div></TableCell></TableRow> : (
+                                                data.length ? data.map((item, index) => {
+                                                    return <TableRow key={index}>
+                                                        <TableCell className='font-semibold'>{item.PARTNO} </TableCell>
+                                                        <TableCell className='font-semibold'>{item.CM}</TableCell>
+                                                        <TableCell className='font-semibold'>{item.PARTNAME != null ? item.PARTNAME : 'PACKAGING'}</TableCell>
+                                                        <TableCell className='font-semibold text-right'>{typeof item.BOX_QTY != 'undefined' ? <NumericFormat value={item.BOX_QTY} displayType='text' className='text-[14px]' thousandSeparator="," /> : '-'}</TableCell>
+                                                        <TableCell className='font-semibold'>{typeof item.UNIT != 'undefined' ? item.UNIT : '-'}</TableCell>
+                                                        <TableCell className='font-semibold text-center bg-blue-50'>{dayjs(item.PERIOD_START).format('DD/MM/YYYY')} - {dayjs(item.PERIOD_END).format('DD/MM/YYYY')} </TableCell>
+                                                        <TableCell className='text-right font-semibold bg-blue-50'><NumericFormat value={item.PLAN_QTY} displayType='text' className='text-3xl' thousandSeparator="," /></TableCell>
+                                                        <TableCell className='text-right font-semibold bg-yellow-100'><StockInHouseVal usage={item.PLAN_QTY} stock={item.STOCK} /></TableCell>
+                                                    </TableRow>
+                                                }) : <TableRow><TableCell colSpan={8} className='text-center p-3'>ไม่พบข้อมูล</TableCell></TableRow>
+                                            )
+                                        }
 
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
     )
 }
 

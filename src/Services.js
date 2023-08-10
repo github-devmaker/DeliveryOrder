@@ -37,3 +37,16 @@ export function GetVenders() {
     })
 }
 
+export function GET_STOCK(data) {
+    return new Promise(resolve => {
+        http.post('/data/stock', data).then((res) => {
+            resolve(res.data);
+        }).catch(() => {
+            resolve([]);
+        })
+    })
+}
+
+
+
+

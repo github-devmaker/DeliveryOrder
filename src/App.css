@@ -505,9 +505,7 @@ h2.doLineHorizontal .doPlan {
     text-align: center;
 }
 
-.supplier-page .tbContent,
-.po-page .tbContent,
-.stock-page .tbContent {
+.tbContent {
     height: 100%;
     outline: none;
     overflow-y: auto;
@@ -528,4 +526,15 @@ h2.doLineHorizontal .doPlan {
 .night .text-mtr,
 .night .box-filter label {
     color: #4effc1;
+}
+
+.night .tbBorder {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.night .tbBorder,
+.night .tbBorder th,
+.night .tbBorder td {
+    border: 1px solid #e8e8e8;
 }

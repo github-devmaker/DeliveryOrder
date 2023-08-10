@@ -30,10 +30,10 @@ function PlanPage() {
     const [parts, setParts] = useState([]);
     const [columns, setColumns] = useState([]);
     const [master, setMaster] = useState([]);
-    const [holiday,setHoliday] = useState([]);
+    const [holiday, setHoliday] = useState([]);
     const [planDefault, setPlanDefault] = useState([]);
     const [ListSupplier, SetListSupplier] = useState([]);
-    const [SupplierSelected, SetSupplierSelected] = useState('012016');
+    const [SupplierSelected, SetSupplierSelected] = useState('013013');
     const [loading, setLoading] = useState(true);
     const [msgNoData, setMsgNoData] = useState(false);
     const [openApprDo, setOpenApprDo] = useState(false);
@@ -47,6 +47,7 @@ function PlanPage() {
     const [drawingDetail, setDrawingDetail] = useState([]);
     const reducer = useSelector(state => state.mainReducer);
     const dispatch = useDispatch();
+    const [runcode, setRunCode] = useState('');
     var startDate = moment().add(-7, 'days').format('YYYY-MM-DD');
     var endDate = moment().add(1, 'months').format('YYYY-MM-DD');
     var ranonce = false;
@@ -84,6 +85,7 @@ function PlanPage() {
         setMsgNoData(false);
         ServiceGetPlan(SupplierCode).then((res) => {
             console.log(res.data)
+            setRunCode(res.data.runningCode);
             setLoading(false);
             setHoliday(res.data.holiday.map(el => el.code));
             setRunningCode(res.data.runningCode != '' ? res.data.runningCode : '-');
@@ -219,7 +221,7 @@ function PlanPage() {
                         setRunningCode(res.data.runningCode);
                     }
                     setMsgWaitApprDo('ออกแผน Delivery Order สำเร็จแล้ว');
-                    setShowBtnRunDo(false);
+                    setShowBtnRunDo(true);
                 } else {
                     setMsgWaitApprDo('ไม่สามารถออกแผน Delivery Order ได้ กรุณาติดต่อทีมงาน IT (เบียร์ 250)');
                 }
@@ -296,7 +298,7 @@ function PlanPage() {
                     <div className='bg-[#181818] text-[#ffffffc7] px-3 py-1 font-thin flex items-center gap-2 line-b'>
                         <DiamondIcon className='text-yellow-300 ' />
                         <span>&nbsp;D/O RUNNING : </span>
-                        <span className='text-[#4effca]'>20230807001</span>
+                        <span className='text-[#4effca]'>{runcode}</span>
                         <div className={`bg-[#4effca] text-[#080b0f] w-fit rounded-[8px] px-[8px] pt-[0px] pb-[4px] cursor-pointer transition ease-in-out delay-50  hover:-translate-y-1 hover:scale-105 hover:bg-[#4effca] hover:text-[#080b0f] duration-300 shadow-mtr w-fit animate-bounce hover:animate-pulse `} onClick={() => setOpenApprDo(true)}>
                             <Stack alignItems={'center'} direction={'row'}>
                                 <ElectricBoltIcon className='text-[.75vw] mr-1' />
@@ -387,7 +389,7 @@ function PlanPage() {
                                                                 }
                                                                 {
                                                                     reducer.titles[3].checked && <TableRow>
-                                                                        <ItemCell dataSet={plan[part]} keyShow='doPlan' _class='doPlanVal' endDate={endDate} master={master} holiday = {holiday} part={part}></ItemCell>
+                                                                        <ItemCell dataSet={plan[part]} keyShow='doPlan' _class='doPlanVal' endDate={endDate} master={master} holiday={holiday} part={part}></ItemCell>
                                                                     </TableRow>
                                                                 }
                                                                 {
@@ -441,7 +443,7 @@ function PlanPage() {
                             </DialogContentText>
                             {
                                 loadingApprDo && <div className='flex items-center justify-start flex-col gap-2 py-[16px]'>{
-                                    msgWaitApprDo == "กรุณารอสักครู่ . . ." ? <CircularProgress /> : (msgWaitApprDo == "สร้างแผน Delivery Order สำเร็จแล้ว" ? <CheckCircleRoundedIcon color={'success'} sx={{ fontSize: 100 }} /> : <CancelRoundedIcon sx={{ fontSize: 100, color: red[500] }} />)
+                                    msgWaitApprDo == "กรุณารอสักครู่ . . ." ? <CircularProgress /> : (msgWaitApprDo == "ออกแผน Delivery Order สำเร็จแล้ว" ? <CheckCircleRoundedIcon color={'success'} sx={{ fontSize: 100 }} /> : <CancelRoundedIcon sx={{ fontSize: 100, color: red[500] }} />)
                                 }<span>{msgWaitApprDo}</span></div>
                             }
                         </DialogContent>
